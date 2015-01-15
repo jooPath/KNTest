@@ -3,8 +3,6 @@
  */
 module.exports = Config;
 
-var Node = require ('../ResourceManager/Node.js');
-
 function Config(){
     this.ARRAYMAXSIZE = 10;
     this.CloudInfo =
@@ -37,20 +35,20 @@ function Config(){
         cost: [0.03, 0.06, 0.12, 0.24], // Tiny, small, medium, large
         executionTime:
             [
-                [0.0, 0.0, 0.0],        // Tiny (dummy)
-                [0.0, 21.38, 26.33],    // Small
-                [0.0, 13.07, 16.73],    // Medium
-                [0.0, 8.86, 11.79]      // Large
+                [0.0, 0.0, 0.0, 0.0],       // dummy
+                [0.0, 21.38, 13.07, 8.86],  // sdf-100
+                [0.0, 26.33, 16.73, 11.79]  // sdf-200
             ],
         executionTimeAverage: [0.0, 14.43, 18.28],
         testNode: [],
 
         nodeInit: function(){ // 1->2->3->5 , 1->4->5
-            var t1 = new Node({name:'T1', nodeid:'1', instanceid:'1', cmd:'111'});
-            var t2 = new Node({name:'T2', nodeid:'1', instanceid:'2', cmd:'222'});
-            var t3 = new Node({name:'T3', nodeid:'1', instanceid:'3', cmd:'333'});
-            var t4 = new Node({name:'T4', nodeid:'2', instanceid:'4', cmd:'444'});
-            var t5 = new Node({name:'T5', nodeid:'2', instanceid:'5', cmd:'555'});
+            var Task = require ('../Schedulers/HFS_static/Model/Task.js');
+            var t1 = new Task({name:'T1', nodeid:'1', instanceid:'1', cmd:'111'});
+            var t2 = new Task({name:'T2', nodeid:'1', instanceid:'2', cmd:'222'});
+            var t3 = new Task({name:'T3', nodeid:'1', instanceid:'3', cmd:'333'});
+            var t4 = new Task({name:'T4', nodeid:'2', instanceid:'4', cmd:'444'});
+            var t5 = new Task({name:'T5', nodeid:'2', instanceid:'5', cmd:'555'});
 
             this.testNode.push(t1);
             this.testNode.push(t2);
@@ -60,6 +58,7 @@ function Config(){
 
             t1.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
             t1.addOutputInterface({id:'2', name:'o2', allowedTypes:[]});
+            t1.addOutputInterface({id:'3', name:'o3', allowedTypes:['test']});
 
             t2.addInputInterface({id:'1', name:'i1', allowedTypes:[]});
             t2.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
@@ -78,7 +77,6 @@ function Config(){
             t2.link({from:'1', to:'1', target:t3});
             t3.link({from:'1', to:'1', target:t5});
             t4.link({from:'1', to:'2', target:t5});
-
         }
     };
 }
