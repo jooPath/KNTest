@@ -1,7 +1,7 @@
 /**
  * Created by 짱경노 on 2015-01-14.
  */
-
+//안씀
 module.exports = Interface;
 
 function Interface (type, instance, interfaceid) {

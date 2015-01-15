@@ -4,7 +4,7 @@
 module.exports = Config;
 
 var Node = require ('../ResourceManager/Node.js');
-var Interface = require ('../ResourceManager/Interface.js'); // test용
+
 function Config(){
     this.ARRAYMAXSIZE = 10;
     this.CloudInfo =
@@ -46,11 +46,11 @@ function Config(){
         testNode: [],
 
         nodeInit: function(){ // 1->2->3->5 , 1->4->5
-            var t1 = new Node(1,1,'1');
-            var t2 = new Node(1,2,'2');
-            var t3 = new Node(1,3,'3');
-            var t4 = new Node(2,4,'4');
-            var t5 = new Node(2,5,'5');
+            var t1 = new Node({name:'T1', nodeid:'1', instanceid:'1', cmd:'111'});
+            var t2 = new Node({name:'T2', nodeid:'1', instanceid:'2', cmd:'222'});
+            var t3 = new Node({name:'T3', nodeid:'1', instanceid:'3', cmd:'333'});
+            var t4 = new Node({name:'T4', nodeid:'2', instanceid:'4', cmd:'444'});
+            var t5 = new Node({name:'T5', nodeid:'2', instanceid:'5', cmd:'555'});
 
             this.testNode.push(t1);
             this.testNode.push(t2);
@@ -58,42 +58,27 @@ function Config(){
             this.testNode.push(t4);
             this.testNode.push(t5);
 
-            var o11 = new Interface('output', t1, 1);
+            t1.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
+            t1.addOutputInterface({id:'2', name:'o2', allowedTypes:[]});
 
-            var o12 = new Interface('output', t1, 2);
-            t1.outputInterface.push({type: 'output'});
-            t1.outputInterface[0].nextLink = t2.inputInterface[1];
-            t1.outputInterface.push(o12);
+            t2.addInputInterface({id:'1', name:'i1', allowedTypes:[]});
+            t2.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
 
-            var i21 = new Interface('input', t2, 1);
-            var o21 = new Interface('output', t2, 1);
-            t2.inputInterface.push(i21);
-            t2.outputInterface.push(o21);
+            t3.addInputInterface({id:'1', name:'i1', allowedTypes:[]});
+            t3.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
 
-            var i31 = new Interface('input', t3, 1);
-            var o31 = new Interface('output', t3, 1);
-            t3.inputInterface.push(i31);
-            t3.outputInterface.push(o31);
+            t4.addInputInterface({id:'1', name:'i1', allowedTypes:[]});
+            t4.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
 
-            var i41 = new Interface('input', t4, 1);
-            var o41 = new Interface('output', t4, 1);
-            t4.inputInterface.push(i41);
-            t4.outputInterface.push(o41);
+            t5.addInputInterface({id:'1', name:'i1', allowedTypes:[]});
+            t5.addInputInterface({id:'2', name:'i2', allowedTypes:[]});
 
-            var i51 = new Interface('input', t5, 1);
-            var i52 = new Interface('output', t5, 1);
-            t5.inputInterface.push(i51);
-            t5.inputInterface.push(i52);
+            t1.link({from:'1', to:'1', target:t2});
+            t1.link({from:'2', to:'1', target:t4});
+            t2.link({from:'1', to:'1', target:t3});
+            t3.link({from:'1', to:'1', target:t5});
+            t4.link({from:'1', to:'2', target:t5});
 
-
-/*
-            t1.makeLink( t1.getInterface('output', 1) , t2.getInterface('input', 1));
-            t1.makeLink( t1.getInterface('output', 2) , t4.getInterface('input', 1));
-
-            t2.makeLink( t2.getInterface('output', 1), t3.getInterface('input', 1));
-            t3.makeLink( t3.getInterface('output', 1), t5.getInterface('input', 1));
-
-            t4.makeLink( t4.getInterface('output', 1), t5.getInterface('input', 2));*/
         }
     };
 }

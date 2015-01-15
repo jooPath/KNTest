@@ -5,9 +5,8 @@
 var Config = require ('../Config/Config.js');
 var cf = new Config;
 cf.TestforHFS.nodeInit();
-console.log(cf.TestforHFS.testNode);
-//console.log(cf.TestforHFS.testNode[1].toString());
-//console.log(cf.TestforHFS.testNode[2].toString());
-//console.log(cf.TestforHFS.testNode[3].toString());
-//console.log(cf.TestforHF
-// S.testNode[4].toString());
+console.log(JSON.stringify(cf.TestforHFS.testNode[0]));
+console.log(JSON.stringify(cf.TestforHFS.testNode[1]));
+console.log(JSON.stringify(cf.TestforHFS.testNode[2]));
+console.log(JSON.stringify(cf.TestforHFS.testNode[3]));
+console.log(JSON.stringify(cf.TestforHFS.testNode[4]));

@@ -4,7 +4,7 @@
 
 module.exports = Task;
 
-var Node = require ('./Nodes.js');
+var Node = require ('./Node.js');
 
 function Task(node){
     this.base = node;
