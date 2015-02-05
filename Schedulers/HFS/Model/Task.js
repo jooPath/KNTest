@@ -57,8 +57,8 @@ function Task(nodeinfo){ // {name:'T1', nodeid:'1', instanceid:'1', cmd:'11111'}
     };
 
     // For Test
-    this.getExecutionTime = function(){
-        return cf.TestforHFS.executionTime[this.nodeID];
+    this.getExecutionTime = function(vmType){
+        return cf.TestforHFS.executionTime[this.nodeID][vmType];
     };
     this.getAverageExecutionTime = function(){
         return cf.TestforHFS.executionTimeAverage[this.nodeID];
