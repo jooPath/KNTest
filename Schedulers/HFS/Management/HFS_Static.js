@@ -27,7 +27,7 @@ function HFS_Static(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:1
 
             while(target.taskList.length > 0)   // 프래그먼트 scheduling
             {
-                vm_unit++;
+                vm_unit++;          // 처음에 VM_Unit = 1 (스케줄링에 실패하면 VM Unit은 기존꺼에 1 더해짐)
 
                 var manTask = this.mandatoryTask(target, vm_unit).instanceID;   // mandatory task
                 var manTaskIndex = _.findIndex(target.taskList, function (task) {    // mandatory index
@@ -41,20 +41,20 @@ function HFS_Static(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:1
                         if (sum + target.taskList[j].getExecutionTime(i) <= vm_unit * cf.VMInfo.OVM_UNIT_TIME / 1000) {
                             target.taskList[j].EST = Number(sum + target.subDeadline.S).toFixed(2);
                             sum += target.taskList[j].getExecutionTime(i);
-                            target.taskList[j].EFT = Number(sum + target.subDeadline.S).toFixed(2);                       // set EST, EFT of task
+                            target.taskList[j].EFT = Number(sum + target.subDeadline.S).toFixed(2);// set EST, EFT of task
                         } else {
                             break;
                         }
                     }
                     //console.log('j'+j+', mTindex'+manTaskIndex + ' ');
 
-                    if (j >= manTaskIndex) {
-                        // manTask를 포함하는 vm Type을 찾음
-                        if (target.deadline() <= vm_unit * cf.VMInfo.OVM_UNIT_TIME / 1000 && sum >= target.deadline())continue;
-                        scheduleList.push({task: _.first(target.taskList, j), type: i});
+                    if (j >= manTaskIndex) {   // manTask를 포함하는 vm Type을 찾음
+                        if (target.deadline() <= vm_unit * cf.VMInfo.OVM_UNIT_TIME / 1000 && sum >= target.deadline() && i != vmType_max)continue;
+                        // 남은 데드라인 < VM Unit time인 경우 데드라인보다 큰지도 체크해야함 (vmtype이 최대인경우는 제외)
+                        scheduleList.push({taskList: _.take(target.taskList, j), type: i}); // 스케줄리스트에 추가
 
-                        target.taskList = _.drop(target.taskList, j);
-                        target.subDeadline.S += sum;
+                        target.taskList = _.drop(target.taskList, j);   // 추가된 부분 제외한 친구들에대해 다시 스케줄링
+                        target.subDeadline.S += sum;                    // 데드라인 변경
 
                         //console.log(JSON.stringify(scheduleList));
                         //console.log(i + " " + j + " " + sum + " " + target.subDeadline.S + ":" + target.subDeadline.E);
@@ -70,26 +70,29 @@ function HFS_Static(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:1
                 }
             }
                 // LFT, LST 계산 부분.  sub-deadline을 부득이하게 어기는 경우, LFT가 음수가 나올 수 있기 때문에 전체 노드의 EST와 비교
-            var sum = target.subDeadline.E;
-            for (var i = scheduleList.length - 1; i >= 0; i--) {
-                 for (var j = scheduleList[i].task.length - 1; j >= 0; j--) {
-                    scheduleList[i].task[j].LFT = Math.max(sum, scheduleList[i].task[j].EFT).toFixed(2);
-                    sum -= scheduleList[i].task[j].getExecutionTime(scheduleList[i].type);
-                    scheduleList[i].task[j].LST = Math.max(sum, scheduleList[i].task[j].EST).toFixed(2);
+            var sum = target.subDeadline.E; // 데드라인부터
+            for (var i = scheduleList.length - 1; i >= 0; i--) {    // ScheduleList의 뒷부분부터
+                 for (var j = scheduleList[i].taskList.length - 1; j >= 0; j--) {   // 각 List의 task도 뒷부분부터
+                     // 스케줄 실패한 경우에는 LFT=EFT, LST=EST
+                    scheduleList[i].taskList[j].LFT = Math.max(sum, scheduleList[i].taskList[j].EFT).toFixed(2);
+                    sum -= scheduleList[i].taskList[j].getExecutionTime(scheduleList[i].type);
+                    scheduleList[i].taskList[j].LST = Math.max(sum, scheduleList[i].taskList[j].EST).toFixed(2);
                  }
             }
             // fragment.subFrags.push({fragment:sub_fragments[i], from:cursor, to:join});
 
             for(var i = 0; i< target.subFrags.length; i++){
+                // sub-fragment들의 데드라인 할당
                 target.subFrags[i].fragment.subDeadline.S = Number( this.findIndexbyInstanceID(scheduleList,  target.subFrags[i].from).EFT );
                 target.subFrags[i].fragment.subDeadline.E = Number( this.findIndexbyInstanceID(scheduleList,  target.subFrags[i].to).LST );
                 //console.log( target.subFrags[i].from);
             }
+            // 출력
             for (var i =0;i< scheduleList.length ; i++)
             {
-                console.log('[');
-                for (var j = 0;j < scheduleList[i].task.length; j++) {
-                    console.log('\tid : ' + scheduleList[i].task[j].instanceID + '\t' + scheduleList[i].task[j].EST + ':' + scheduleList[i].task[j].EFT + ' or ' + scheduleList[i].task[j].LST + ':' + scheduleList[i].task[j].LFT);
+                console.log('[\tVMTYPE:'+scheduleList[i].type);
+                for (var j = 0;j < scheduleList[i].taskList.length; j++) {
+                    console.log('\tid : ' + scheduleList[i].taskList[j].instanceID + '\t' + scheduleList[i].taskList[j].EST + ':' + scheduleList[i].taskList[j].EFT + ' or ' + scheduleList[i].taskList[j].LST + ':' + scheduleList[i].taskList[j].LFT);
                 }
                 console.log('[');
             }
@@ -101,6 +104,8 @@ function HFS_Static(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:1
        // console.log(fragment.eet + "eet");
         var load = fragment.eet * Math.min (((vm_unit * cf.VMInfo.OVM_UNIT_TIME / 1000) / (fragment.subDeadline.E - fragment.subDeadline.S)), 1.0) ;
         var loadsum = 0;
+
+        if(load == fragment.eet){return fragment.taskList[fragment.taskList.length-1];}
 
         var manTask = fragment.taskList[0];
         //console.log(load + "load");
@@ -119,8 +124,8 @@ function HFS_Static(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:1
     this.findIndexbyInstanceID = function(scheduleList, instanceID){
 
         for(var i=0;i<scheduleList.length;i++){
-            for(var j=0;j<scheduleList[i].task.length;j++){
-                if(scheduleList[i].task[j].instanceID == instanceID)return scheduleList[i].task[j];
+            for(var j=0;j<scheduleList[i].taskList.length;j++){
+                if(scheduleList[i].taskList[j].instanceID == instanceID)return scheduleList[i].taskList[j];
             }
         }
         return -1;

@@ -23,7 +23,7 @@ var taskList = cf.TestforHFS.testNode;
 var Frag = new Fragmentation(taskList, {headid:taskList[0].instanceID, tailid:11}, 90.0);
 Frag.do();
 
-///new HFS_Static(Frag.fragmentList).do();
+new HFS_Static(Frag.fragmentList).do();
 
 //var List = VMList.getList();
 //console.log(List)
