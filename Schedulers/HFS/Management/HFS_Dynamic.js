@@ -36,6 +36,7 @@ function HFS_Dynamic(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:
                 break;
             }
         }
+
         return manTask;
     };
     this.findIndexbyInstanceID = function(scheduleList, instanceID){
