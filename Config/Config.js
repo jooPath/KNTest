@@ -3,6 +3,8 @@
  */
 module.exports = Config;
 
+//var Task = require ('../Schedulers/HFS/Model/Task.js');
+var Task = require ('../Schedulers/ICPCP/Task.js');
 function Config(){
     this.ARRAYMAXSIZE = 10;
     this.CloudInfo =
@@ -43,7 +45,6 @@ function Config(){
         testNode: [],
 
         testnodeInit: function(){ // 1->2->3->5 , 1->4->5
-            var Task = require ('../Schedulers/HFS/Model/Task.js');
             var t1 = new Task({name:'T1', nodeid:'1', instanceid:'1', cmd:'111'});
             var t2 = new Task({name:'T2', nodeid:'1', instanceid:'2', cmd:'222'});
             var t3 = new Task({name:'T3', nodeid:'1', instanceid:'3', cmd:'333'});
@@ -79,7 +80,7 @@ function Config(){
             t4.link({from:'1', to:'2', target:t5});
         },
         testnodeInit2: function() { // 1->2->3->5 , 1->4->5
-            var Task = require ('../Schedulers/HFS/Model/Task.js');
+            //var Task = require ('../Schedulers/HFS/Model/Task.js');
             var t1 = new Task({name:'T1', nodeid:'1', instanceid:'1', cmd:'111'});
             var t2 = new Task({name:'T2', nodeid:'1', instanceid:'2', cmd:'222'});
             var t3 = new Task({name:'T3', nodeid:'1', instanceid:'3', cmd:'333'});

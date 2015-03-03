@@ -92,7 +92,7 @@ function HFS_Static(fragList) { // taskList:[], {headid:h, tailid:t}, deadline:1
             {
                 console.log('[\tVMTYPE:'+scheduleList[i].type);
                 for (var j = 0;j < scheduleList[i].taskList.length; j++) {
-                    console.log('\tid : ' + scheduleList[i].taskList[j].instanceID + '\t' + scheduleList[i].taskList[j].EST + ':' + scheduleList[i].taskList[j].EFT + ' or ' + scheduleList[i].taskList[j].LST + ':' + scheduleList[i].taskList[j].LFT);
+                    console.log('\t[id : ' + scheduleList[i].taskList[j].instanceID + ']\t' + scheduleList[i].taskList[j].EST + ':' + scheduleList[i].taskList[j].EFT + ' or ' + scheduleList[i].taskList[j].LST + ':' + scheduleList[i].taskList[j].LFT);
                 }
                 console.log('[');
             }

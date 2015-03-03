@@ -6,14 +6,16 @@ module.exports = Fragmentation;
 
 var _ = require('lodash');
 var Fragment = require('./../Model/Fragment.js');
+var Task = require ('./../Model/Task.js');
 
-function Fragmentation(taskList, fragmentationinfo, deadline){ // taskList:[], {headid:h, tailid:t}, deadline:150.0
+function Fragmentation(taskList, deadline){ // taskList:[], {headid:h, tailid:t}, deadline:150.0
 
     this.fragmentList = [];
     this.fragmentID = 0;
 
     this.do = function(){
-        var criticalPath = this.fragmentation(fragmentationinfo); // = new Fragment({fragmentID:(fragmentID++)});
+        this.dummyNode(taskList);   // dummy head와 tail 추가. id는 -1, -2 부여.
+        var criticalPath = this.fragmentation({headid:'-1', tailid:'-2'});//fragmentationinfo); // = new Fragment({fragmentID:(fragmentID++)});
         criticalPath.subDeadline = {S:0, E:deadline};   // 최종 critical path에 서브데드라인 할당
 
         //console.log(criticalPath.subFrags[0]);
@@ -22,7 +24,6 @@ function Fragmentation(taskList, fragmentationinfo, deadline){ // taskList:[], {
         for(var i=0;i<this.fragmentList.length;i++){
             console.log(this.fragmentList[i].showme());
         }
-
     };
 
     this.fragmentation = function(fragmentationinfo){
@@ -140,4 +141,37 @@ function Fragmentation(taskList, fragmentationinfo, deadline){ // taskList:[], {
         }
         return -1;
     };
+
+    this.dummyNode = function(taskList){
+        var head = new Task({name:'dummyhead', nodeid:'0', instanceid:'-1', cmd:'-1'});
+        var tail = new Task({name:'dummytail', nodeid:'0', instanceid:'-2', cmd:'-2'});
+
+        var headnodes = [];
+        var tailnodes = [];
+
+        ///{id:interfaceinfo.id, name:interfaceinfo.name, allowedTypes:interfaceinfo.allowedTypes, instanceID:this.instanceID, connected:null, connectedInterfaceID:null}
+        for(var i=0;i<taskList.length;i++){
+            if(taskList[i].prevConnectedList().length == 0)headnodes.push(taskList[i]);
+            if(taskList[i].nextConnectedList().length == 0)tailnodes.push(taskList[i]);
+        }
+
+        //t2.addInputInterface({id:'1', name:'i1', allowedTypes:[]});
+        //t2.addOutputInterface({id:'1', name:'o1', allowedTypes:[]});
+        for(var i=0;i<headnodes.length;i++){
+            head.addOutputInterface({id: -(i+1)+'', name:'dummy'+(i+1) , allowedTypes:[]});
+            headnodes[i].addInputInterface({id: '-1', name:'dummy1', allowedTypes:[]});
+
+            head.link({from:-(i+1)+'', to:'-1', target:headnodes[i]});
+        }
+        for(var i=0;i<tailnodes.length;i++){
+            tail.addInputInterface({id: -(i+1)+'', name:'dummy'+(i+1) , allowedTypes:[]});
+            tailnodes[i].addOutputInterface({id: '-1', name:'dummy1', allowedTypes:[]});
+
+            tailnodes[i].link({from:'-1', to:-(i+1)+'', target:tail});
+        }
+        //console.log(head.outputInterface);
+        //console.log(tail.inputInterface);
+        taskList.push(head);
+        taskList.push(tail);
+    }
 }
