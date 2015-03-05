@@ -3,8 +3,8 @@
  */
 module.exports = Config;
 
-//var Task = require ('../Schedulers/HFS/Model/Task.js');
-var Task = require ('../Schedulers/ICPCP/Task.js');
+var Task = require ('../Schedulers/HFS/Model/Task.js');
+//var Task = require ('../Schedulers/ICPCP/Task.js');
 function Config(){
     this.ARRAYMAXSIZE = 10;
     this.CloudInfo =

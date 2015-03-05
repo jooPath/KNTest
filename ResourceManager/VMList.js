@@ -3,21 +3,6 @@
  */
     //singleton Pattern
 
-module.exports = VMList;
-
-var VMList = (function () {
-    var instance;
-
-    function createList() {
-        this.vmList = [];
-    }
-
-    return {
-        getList: function () {
-            if (instance == undefined) {
-                instance = new createList();
-            }
-            return instance;
-        }
-    };
-})();
+module.exports = {
+    vmList: []
+};

@@ -5,19 +5,29 @@
 module.exports = ICPCP;
 
 var _ = require('lodash');
+var VMList = require('../../ResourceManager/VMList.js' ) ;
+var VirtualMachine = require('../../ResourceManager/VirtualMachine.js');
 var Task = require('./Task.js');
-//var Fragment = require('./../HFS/Model/Fragment.js');
+
 
 function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadline:150.0
 
     var TT = 0.0;
+    var id = 1;
+    //VMList = require('./../../ResourceManager/VMList.js');
+    console.log(VMList);
+    var List = VMList.vmList;
+
     this.do = function(){
 
        while(taskList.length > 0)
        {
             this.initialization(taskList);
             this.PCP(taskList);
-        }
+        }/*
+        for(var i=0;i<List.length;i++){
+            console.log(List[i].test());
+        }*/
     };
     this.initialization = function(taskList){
         this.dummyNode(taskList);
@@ -43,13 +53,13 @@ function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadl
     };
     this.scheduling = function(pcp){
         var type;
-        console.log(pcp[pcp.length-2].EST+' to '+pcp[1].LFT);
+        //console.log(pcp[pcp.length-2].EST+' to '+pcp[1].LFT);
         var deadline = pcp[1].LFT - pcp[pcp.length-2].EST;
 
-        console.log(deadline);
+        //console.log(deadline);
         for(type = 1;type<=3;type++){
             var sum = Number(pcp[pcp.length-2].EST); // 문제있음
-            //sum = sum.toFixed(2);
+            //sum = sum.toFixed(2); // 여기서 tofixed를 쓰면 에러가 나는 문제가 있는디 까닭은 몰겠음
 
             for(var i = pcp.length-2; i>=1; i--) { // ignore dummy head/tail
                 pcp[i].AST = Number(sum).toFixed(2);
@@ -93,11 +103,15 @@ function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadl
 
         if(type == 4){ // type 이내로 스케줄링 불가능하면
             type = 3;   // 가장 좋은 type으로..
-            console.log('T.T;;');
         }
-        var test = type + " type : [\n"
+
+        //거꾸로 들어있기 떄문에 순서 뒤집고, 맨앞 맨뒤 task 제거해서 VM에 넣는다.
+        var tasks = [];
+        for(var i = pcp.length-2;i>=1;i--){
+            tasks.push(pcp[i]);
+        }
+
         for(var i = pcp.length -1;i>=0;i--) {
-            test += pcp[i].instanceID + '(' + pcp[i].EST+':'+pcp[i].EFT +'/'+pcp[i].LST+':'+pcp[i].LFT+  '/' + pcp[i].AST + ':'+ pcp[i].AFT+') \n';
             var index = this.findIndexbyInstanceID( pcp[i].instanceID );
             var successors = pcp[i].nextConnectedList();
             var predecessors = pcp[i].prevConnectedList();
@@ -110,10 +124,10 @@ function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadl
             }
             taskList.splice(index, 1);
         }
-        test += ']';
 
-        console.log(test);
-        return type;
+        var VM = new VirtualMachine({id:id++, type:type, buildtime:tasks[0].AST, terminatetime:tasks[tasks.length-1].AFT});
+        VM.taskqueue = tasks;
+        List. push(VM);
     };
     this.findIndexbyInstanceID = function(instanceID){
         return _.findIndex(taskList, {instanceID:instanceID});
@@ -121,9 +135,6 @@ function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadl
     this.dummyNode = function(taskList){
         var head = new Task({name:'dummyhead', nodeid:'0', instanceid:'-1', cmd:'-1'});
         var tail = new Task({name:'dummytail', nodeid:'0', instanceid:'-2', cmd:'-2'});
-
-        //head.EST = 99999.0; // 임시값
-        //tail.LFT = 0.0;     // 임시값
 
         var headnodes = [];
         var tailnodes = [];
@@ -143,10 +154,6 @@ function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadl
 
             head.link({from:-(i+1)+'', to:'-1', target:headnodes[i]});
         }
-        /*if(head.EST == 99999.0){
-            head.EST = 0.0;
-            head.EFT = 0.0;
-        }*/
 
         for(var i=0;i<tailnodes.length;i++){
             tail.addInputInterface({id: -(i+1)+'', name:'dummy'+(i+1) , allowedTypes:[]});
@@ -156,11 +163,7 @@ function ICPCP(taskList, deadline) { // taskList:[], {headid:h, tailid:t}, deadl
                 tail.LFT = tailnodes[i].LFT; // tailnodes 의 LFT 중 최대값을 넣는다
             }
             tailnodes[i].link({from:'-1', to:-(i+1)+'', target:tail});
-        }/*
-        if(tail.LFT == 0.0){
-            tail.LFT = deadline;
-            tail.LST = deadline;
-        }*/
+        }
         taskList.push(head);
         taskList.push(tail);
     };

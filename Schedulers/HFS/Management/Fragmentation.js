@@ -18,12 +18,10 @@ function Fragmentation(taskList, deadline){ // taskList:[], {headid:h, tailid:t}
         var criticalPath = this.fragmentation({headid:'-1', tailid:'-2'});//fragmentationinfo); // = new Fragment({fragmentID:(fragmentID++)});
         criticalPath.subDeadline = {S:0, E:deadline};   // 최종 critical path에 서브데드라인 할당
 
-        //console.log(criticalPath.subFrags[0]);
-
         this.fragmentList.push(criticalPath);           // 최종 critical path도 fragment list에 합쳐넣는다.
-        for(var i=0;i<this.fragmentList.length;i++){
+        /*for(var i=0;i<this.fragmentList.length;i++){
             console.log(this.fragmentList[i].showme());
-        }
+        }*/
     };
 
     this.fragmentation = function(fragmentationinfo){
@@ -65,16 +63,22 @@ function Fragmentation(taskList, deadline){ // taskList:[], {headid:h, tailid:t}
                     // 다른 sub_fragment에서는 critical path에 합쳐진 tasklist를 제외한다 (겹치는경우 있으므로)
                     sub_fragments[i].recalculateEET(); // 제외된 task에 대해 eet 다시 계산
 
-                    var flag = true;
+                   /* var flag = true;
                     for(var j=0;j<this.fragmentList.length;j++){
                         if(_.isEqual(this.fragmentList[j].taskList, sub_fragments[i].taskList)) flag = false;
                     }// fragmentList에 sub_fragment 있는지 중복체크
-                    if(flag){
-                        this.fragmentList.push(sub_fragments[i]); // 중복 없으면 넣는다 (중복되는 경우가 있음..)
-                        for(var j=0;j<sub_fragments[i].subFrags.length;j++){
-                            fragment.subFrags.push(sub_fragments[i].subFrags[j]); // sub_fragment의 subFrags도 넣어준다.
-                        }
+                    if(flag){*/
+                    // 위 소스는 sub-fragment간 중복이 있는지 체크하는 부분이었지만, 중복이 있더라도 sub-deadline이 없으면
+                    // 어차피 동작하지 않기 때문에 그냥 Fragment List에 중복되는 fragment들을 허용하였다.
+                    // 중복을 제거하면 한개만 들어가지만 실제로 스케줄링할 때 해당 fragment가 스케줄링되지 않을 수 있다.
+                    // A->B->C->D->E, A->E->C->D->E, A->B->C->F->E, A인 경우 F가 두번 추가됨.
+                    // 하지만 전체 노드의 크리티컬 패스의 sub-fragment에만 서브 데드라인을 할당하므로 둘중 어느 F에 서브
+                    // 데드라인이 할당될지는 알 수 없음 따라서 중복을 허용 (3/5 수정)
+                    this.fragmentList.push(sub_fragments[i]);
+                    for(var j=0;j<sub_fragments[i].subFrags.length;j++){
+                        fragment.subFrags.push(sub_fragments[i].subFrags[j]); // sub_fragment의 subFrags도 넣어준다.
                     }
+                    //}
                     fragment.subFrags.push({fragment:sub_fragments[i], from:cursor.instanceID, to: this.subFragmentNextNodeID(fragment.taskList, sub_fragments[i].taskList[sub_fragments[i].taskList.length-1])});
                     // 현재 fragment에 taskList에 합쳐지지 않은 subfragment들을 합쳐넣는다.
 

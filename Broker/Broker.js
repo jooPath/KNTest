@@ -22,19 +22,20 @@ var taskList = cf.TestforHFS.testNode;
 //}
 
 //var VM = new VirtualMachine({id:1, type:'m1.small'}).build();
-/*
+
 var Frag = new Fragmentation(taskList, 190.0);//{headid:taskList[0].instanceID, tailid:11}, 90.0);
 Frag.do();
 
-new HFS_Static(Frag.fragmentList).do();*/
+new HFS_Static(Frag.fragmentList).do();
+//new ICPCP(taskList, 190.0).do();
 
-new ICPCP(taskList, 190.0).do();
-/*
-console.log('aa', VMList);
-var List = VMList.getList().vmList;
+var List = VMList.vmList;
+for(var i=0;i<List.length;i++){
+    console.log(List[i].test());
+}
 
-List.push("Kyungno");
-
-console.log(List);
-//console.log(List)
-*/
+//
+//List.push("Kyungno");
+//
+//console.log(List);
+////console.log(List)
